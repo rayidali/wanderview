@@ -25,15 +25,12 @@ AFRAME.registerComponent('google-3dtiles', {
   },
 
   _getApiKey: function () {
-    // Try multiple sources for the API key
+    // Check window global (set by React app from Vite env vars)
+    if (window.WANDERVIEW_GOOGLE_API_KEY) return window.WANDERVIEW_GOOGLE_API_KEY;
+
+    // Check meta tag
     const metaTag = document.querySelector('meta[name="google-api-key"]');
     if (metaTag) return metaTag.content;
-
-    // Check if injected via Vite env
-    try {
-      // This will be replaced at build time
-      if (typeof import.meta !== 'undefined') return '';
-    } catch (e) { /* not in module context */ }
 
     return window.GOOGLE_API_KEY || '';
   },
@@ -77,7 +74,7 @@ AFRAME.registerComponent('google-3dtiles', {
       // Set up rendering loop
       this.el.sceneEl.addEventListener('enter-vr', () => {});
 
-      console.log('Google 3D Tiles loaded for Hell\'s Kitchen');
+      console.log('Google 3D Tiles loaded for WanderView');
       this._signalReady();
     } catch (err) {
       console.error('Failed to load 3D Tiles renderer:', err);

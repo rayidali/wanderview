@@ -1,7 +1,7 @@
 {
-  "name": "hells-kitchen-explorer",
+  "name": "wanderview",
   "version": "1.0.0",
-  "description": "First-person walking game in Hell's Kitchen NYC with Mistral AI game master",
+  "description": "First-person walking game exploring Hell's Kitchen NYC with AI narration",
   "scripts": {
     "dev": "cd game-ui && npm run dev",
     "build": "cd game-ui && npm install && npm run build",

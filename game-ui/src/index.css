@@ -1,40 +1,51 @@
-/* React overlay styles */
+/* WanderView — React Overlay Styles */
 
-/* Narration Bar — top center */
+/* ─── Narration Bar — top center ─── */
 .narration-bar {
   position: fixed;
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  max-width: 600px;
+  max-width: 560px;
   width: 90%;
-  padding: 12px 20px;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(10px);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 107, 53, 0.3);
-  color: #fff;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  padding: 14px 22px;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  color: var(--navy);
+  font-size: 0.9rem;
+  line-height: 1.6;
   text-align: center;
   z-index: 1010;
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  border: 1px solid var(--gray-200);
 }
 
 .narration-bar.hidden {
   opacity: 0;
-  transform: translateX(-50%) translateY(-20px);
+  transform: translateX(-50%) translateY(-16px);
   pointer-events: none;
 }
 
 .narration-bar .narration-text {
-  animation: fadeInUp 0.5s ease;
+  animation: fadeInUp 0.4s ease;
+  font-weight: 500;
+}
+
+.typing-cursor {
+  color: var(--teal);
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -42,51 +53,53 @@
   }
 }
 
-/* HUD — top left */
+/* ─── HUD — top left ─── */
 .hud {
   position: fixed;
   top: 20px;
   left: 20px;
   z-index: 1010;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .hud-score {
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(10px);
-  border-radius: 8px;
+  background: var(--white);
+  border-radius: var(--radius-md);
   padding: 10px 16px;
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 8px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--gray-200);
+}
+
+.hud-score .score-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--gray-400);
+  font-weight: 600;
 }
 
 .hud-score .score-value {
   font-size: 1.5rem;
-  font-weight: 700;
-  color: #f7c948;
-}
-
-.hud-score .score-label {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.5);
+  font-weight: 800;
+  color: var(--navy);
 }
 
 .hud-mode {
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(10px);
-  border-radius: 8px;
-  padding: 8px 14px;
-  color: #ff6b35;
-  font-size: 0.75rem;
+  background: var(--navy);
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+  color: var(--white);
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  border: 1px solid rgba(255, 107, 53, 0.3);
+  letter-spacing: 0.08em;
+  text-align: center;
+  box-shadow: var(--shadow-md);
 }
 
-/* Compass */
+/* ─── Compass — top right ─── */
 .compass {
   position: fixed;
   top: 20px;
@@ -95,12 +108,12 @@
 }
 
 .compass-circle {
-  width: 60px;
-  height: 60px;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(10px);
+  width: 56px;
+  height: 56px;
+  background: var(--white);
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid var(--gray-200);
+  box-shadow: var(--shadow-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -109,39 +122,38 @@
 
 .compass-needle {
   width: 2px;
-  height: 24px;
-  background: linear-gradient(to top, #666 50%, #ff3333 50%);
+  height: 22px;
+  background: linear-gradient(to top, var(--gray-300) 50%, var(--red) 50%);
   transition: transform 0.15s ease-out;
   transform-origin: center center;
 }
 
 .compass-label {
   position: absolute;
-  bottom: -20px;
+  bottom: -22px;
   left: 50%;
   transform: translateX(-50%);
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.7rem;
-  font-weight: 600;
+  color: var(--gray-500);
+  font-size: 0.65rem;
+  font-weight: 700;
   letter-spacing: 0.05em;
 }
 
-/* Mission Panel — top right, below compass */
+/* ─── Mission Panel — top right, below compass ─── */
 .mission-panel {
   position: fixed;
-  top: 110px;
+  top: 105px;
   right: 20px;
-  width: 280px;
+  width: 270px;
   z-index: 1010;
 }
 
 .mission-card {
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(10px);
-  border-radius: 10px;
-  border: 1px solid rgba(255, 107, 53, 0.4);
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-200);
   padding: 16px;
-  color: #fff;
+  box-shadow: var(--shadow-lg);
 }
 
 .mission-header {
@@ -152,46 +164,51 @@
 }
 
 .mission-icon {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
 .mission-title {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #ff6b35;
+  letter-spacing: 0.04em;
+  color: var(--navy);
 }
 
 .mission-description {
-  font-size: 0.85rem;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 10px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--gray-600);
+  margin-bottom: 12px;
+}
+
+.mission-description strong {
+  color: var(--navy);
+  font-weight: 700;
 }
 
 .mission-progress {
   height: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
+  background: var(--gray-200);
+  border-radius: var(--radius-full);
   overflow: hidden;
 }
 
 .mission-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #ff6b35, #f7c948);
-  border-radius: 2px;
+  background: linear-gradient(90deg, var(--teal), var(--blue));
+  border-radius: var(--radius-full);
   transition: width 0.5s ease;
 }
 
 .mission-hint {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.72rem;
+  color: var(--gray-400);
   margin-top: 8px;
   font-style: italic;
 }
 
-/* Location Info — bottom left */
+/* ─── Location Info — bottom left ─── */
 .location-info {
   position: fixed;
   bottom: 20px;
@@ -200,46 +217,49 @@
 }
 
 .location-card {
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(10px);
-  border-radius: 8px;
-  padding: 10px 16px;
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--white);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--gray-200);
 }
 
 .location-street {
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--navy);
 }
 
 .location-coords {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.65rem;
+  color: var(--gray-400);
   margin-top: 2px;
-  font-family: monospace;
+  font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
 .location-landmarks {
   margin-top: 6px;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.72rem;
+  color: var(--gray-500);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-/* Chat — bottom center */
+/* ─── Chat — bottom center ─── */
 .chat-container {
   position: fixed;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  width: 500px;
+  width: 480px;
   max-width: 90vw;
   z-index: 1020;
   transition: height 0.3s ease;
 }
 
 .chat-container.expanded {
-  height: 400px;
+  height: 380px;
 }
 
 .chat-messages {
@@ -253,46 +273,47 @@
 }
 
 .chat-container.expanded .chat-messages {
-  max-height: 320px;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(10px);
-  border-radius: 10px 10px 0 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-height: 310px;
+  padding: 14px;
+  background: var(--white);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  border: 1px solid var(--gray-200);
   border-bottom: none;
+  box-shadow: var(--shadow-lg);
 }
 
 .chat-message {
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  line-height: 1.4;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  line-height: 1.5;
   max-width: 85%;
   animation: fadeInUp 0.3s ease;
 }
 
 .chat-message.user {
   align-self: flex-end;
-  background: rgba(255, 107, 53, 0.3);
-  color: #fff;
-  border: 1px solid rgba(255, 107, 53, 0.4);
+  background: var(--navy);
+  color: var(--white);
+  border-radius: var(--radius-md) var(--radius-md) 4px var(--radius-md);
 }
 
 .chat-message.ai {
   align-self: flex-start;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md) var(--radius-md) var(--radius-md) 4px;
 }
 
 .chat-input-bar {
   display: flex;
   gap: 8px;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(10px);
-  border-radius: 25px;
-  padding: 6px 8px 6px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--white);
+  border-radius: var(--radius-full);
+  padding: 6px 8px 6px 18px;
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-md);
 }
 
 .chat-input-bar input {
@@ -300,17 +321,17 @@
   background: none;
   border: none;
   outline: none;
-  color: #fff;
-  font-size: 0.9rem;
+  color: var(--navy);
+  font-size: 0.85rem;
   font-family: inherit;
 }
 
 .chat-input-bar input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--gray-400);
 }
 
 .chat-input-bar button {
-  background: linear-gradient(135deg, #ff6b35, #f7c948);
+  background: var(--teal);
   border: none;
   border-radius: 50%;
   width: 34px;
@@ -319,26 +340,27 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #000;
-  font-size: 1rem;
-  transition: transform 0.15s ease;
+  color: var(--white);
+  font-size: 0.9rem;
+  transition: background 0.15s ease, transform 0.15s ease;
 }
 
 .chat-input-bar button:hover {
-  transform: scale(1.1);
+  background: var(--teal-dark);
+  transform: scale(1.05);
 }
 
-/* Minimap */
+/* ─── Minimap — bottom right ─── */
 .minimap {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 180px;
-  height: 180px;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(10px);
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  width: 170px;
+  height: 170px;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-lg);
   z-index: 1010;
   overflow: hidden;
   transition: opacity 0.3s ease;
@@ -354,39 +376,44 @@
   height: 100%;
 }
 
-/* Mode Selector */
+/* ─── Mode Selector ─── */
 .mode-selector {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 2000;
-  background: rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(20px);
-  border-radius: 16px;
-  padding: 30px;
-  border: 1px solid rgba(255, 107, 53, 0.3);
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--gray-200);
   text-align: center;
-  min-width: 360px;
+  min-width: 380px;
 }
 
 .mode-selector h2 {
-  color: #ff6b35;
-  font-size: 1.2rem;
-  margin-bottom: 20px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  color: var(--navy);
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.mode-selector p {
+  color: var(--gray-500) !important;
+  font-size: 0.8rem !important;
+  margin-bottom: 20px !important;
 }
 
 .mode-option {
   display: block;
   width: 100%;
-  padding: 14px 20px;
+  padding: 14px 18px;
   margin-bottom: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  color: #fff;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  color: var(--navy);
   font-size: 0.9rem;
   cursor: pointer;
   text-align: left;
@@ -395,39 +422,76 @@
 }
 
 .mode-option:hover {
-  background: rgba(255, 107, 53, 0.2);
-  border-color: rgba(255, 107, 53, 0.5);
+  background: var(--gray-100);
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(45, 212, 168, 0.1);
 }
 
 .mode-option .mode-name {
   font-weight: 700;
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
+  color: var(--navy);
 }
 
 .mode-option .mode-desc {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.72rem;
+  color: var(--gray-500);
 }
 
-/* Controls hint */
+/* ─── API Key Prompt Inputs ─── */
+.mode-selector input[type="password"] {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  color: var(--navy);
+  font-size: 0.85rem;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.mode-selector input[type="password"]:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(45, 212, 168, 0.1);
+}
+
+.mode-selector label {
+  display: block;
+  color: var(--gray-500) !important;
+  font-size: 0.72rem !important;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+/* ─── Controls hint ─── */
 .controls-hint {
   position: fixed;
-  bottom: 80px;
+  bottom: 72px;
   left: 50%;
   transform: translateX(-50%);
-  color: rgba(255, 255, 255, 0.3);
-  font-size: 0.7rem;
+  color: var(--gray-500);
+  font-size: 0.68rem;
   text-align: center;
   z-index: 1005;
   transition: opacity 2s ease;
+  background: var(--white);
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  font-weight: 500;
 }
 
 .controls-hint kbd {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--gray-100);
   padding: 2px 6px;
-  border-radius: 3px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  font-family: monospace;
-  font-size: 0.7rem;
+  border-radius: 4px;
+  border: 1px solid var(--gray-200);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: var(--navy);
+  font-weight: 600;
 }

@@ -15,65 +15,37 @@ export default function ApiKeyPrompt({ onSubmit }) {
 
   return (
     <div className="mode-selector interactive" style={{ minWidth: '420px' }}>
-      <h2>API Keys (Optional)</h2>
-      <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', marginBottom: '16px' }}>
-        The game works without keys using mock data. Add keys for the full AI experience.
-      </p>
+      <h2>WanderView Setup</h2>
+      <p>API keys are optional. The game works without them using demo data.</p>
 
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '12px' }}>
-          <label style={{ display: 'block', color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem', marginBottom: '4px' }}>
-            Mistral AI API Key
-          </label>
+        <div style={{ marginBottom: '12px', textAlign: 'left' }}>
+          <label>Mistral AI API Key</label>
           <input
             type="password"
             value={mistralKey}
             onChange={(e) => setMistralKey(e.target.value)}
             placeholder="Enter Mistral API key..."
-            style={{
-              width: '100%',
-              padding: '10px 14px',
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: '6px',
-              color: '#fff',
-              fontSize: '0.85rem',
-              fontFamily: 'monospace',
-              outline: 'none',
-            }}
           />
         </div>
 
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem', marginBottom: '4px' }}>
-            Google Maps API Key
-          </label>
+        <div style={{ marginBottom: '16px', textAlign: 'left' }}>
+          <label>Google Maps API Key</label>
           <input
             type="password"
             value={googleKey}
             onChange={(e) => setGoogleKey(e.target.value)}
             placeholder="Enter Google API key..."
-            style={{
-              width: '100%',
-              padding: '10px 14px',
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: '6px',
-              color: '#fff',
-              fontSize: '0.85rem',
-              fontFamily: 'monospace',
-              outline: 'none',
-            }}
           />
         </div>
 
         <button
           type="submit"
           className="mode-option"
-          style={{ background: 'rgba(255,107,53,0.2)', borderColor: 'rgba(255,107,53,0.5)' }}
+          style={{ background: 'var(--navy)', color: 'var(--white)', borderColor: 'var(--navy)' }}
         >
-          <span className="mode-name">Start with API Keys</span>
-          <span className="mode-desc">Full AI game master + real place data</span>
+          <span className="mode-name" style={{ color: 'var(--white)' }}>Start with API Keys</span>
+          <span className="mode-desc" style={{ color: 'rgba(255,255,255,0.6)' }}>Full AI game master + real place data</span>
         </button>
 
         <button
@@ -81,8 +53,8 @@ export default function ApiKeyPrompt({ onSubmit }) {
           className="mode-option"
           onClick={handleSkip}
         >
-          <span className="mode-name">Play without Keys</span>
-          <span className="mode-desc">Demo mode with mock narration and places</span>
+          <span className="mode-name">Play Demo Mode</span>
+          <span className="mode-desc">Mock narration and places — no keys needed</span>
         </button>
       </form>
     </div>

@@ -5,7 +5,7 @@
 
 const MISTRAL_API_URL = 'https://api.mistral.ai/v1/chat/completions';
 
-const GAME_MASTER_SYSTEM_PROMPT = `You are the Game Master of Hell's Kitchen Explorer. The player is walking through a 3D recreation of the real Hell's Kitchen neighborhood in Manhattan, NYC.
+const GAME_MASTER_SYSTEM_PROMPT = `You are the Game Master of WanderView. The player is walking through a 3D recreation of the real Hell's Kitchen neighborhood in Manhattan, NYC.
 
 Your personality: A charismatic, witty New Yorker who knows every corner of Hell's Kitchen. Part tour guide, part storyteller, part game master. You speak with authentic NYC energy — confident, warm, occasionally sarcastic, always entertaining.
 
@@ -30,7 +30,7 @@ const GAME_MODE_PROMPTS = {
   mystery: 'Mode: Mystery. A mysterious event has occurred in Hell\'s Kitchen. Drop clues as the player explores. Each location reveals part of the story. Keep it noir and atmospheric.',
 };
 
-let apiKey = '';
+let apiKey = import.meta.env.VITE_MISTRAL_API_KEY || '';
 let conversationHistory = [];
 
 export function setApiKey(key) {
@@ -39,6 +39,10 @@ export function setApiKey(key) {
 
 export function getApiKey() {
   return apiKey;
+}
+
+export function hasApiKey() {
+  return !!apiKey;
 }
 
 export function clearHistory() {

@@ -39,12 +39,12 @@ export default function HUD({ position, gameMode, score }) {
     ctx.clearRect(0, 0, w, h);
 
     // Background
-    ctx.fillStyle = 'rgba(30, 30, 40, 0.9)';
+    ctx.fillStyle = '#F8FAFC';
     ctx.fillRect(0, 0, w, h);
 
     // Draw street grid
     const nav = window.gameNavigation;
-    ctx.strokeStyle = 'rgba(100, 100, 120, 0.5)';
+    ctx.strokeStyle = '#E2E8F0';
     ctx.lineWidth = 1;
 
     // East-West streets
@@ -58,8 +58,8 @@ export default function HUD({ position, gameMode, score }) {
         ctx.stroke();
 
         // Label
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.font = '8px monospace';
+        ctx.fillStyle = '#94A3B8';
+        ctx.font = '8px Inter, sans-serif';
         ctx.fillText(st.name, 4, y - 2);
       }
     });
@@ -84,7 +84,7 @@ export default function HUD({ position, gameMode, score }) {
       const y = centerY - dy;
 
       if (x > 5 && x < w - 5 && y > 5 && y < h - 5) {
-        ctx.fillStyle = '#f7c948';
+        ctx.fillStyle = '#4A90D9';
         ctx.beginPath();
         ctx.arc(x, y, 3, 0, Math.PI * 2);
         ctx.fill();
@@ -92,14 +92,14 @@ export default function HUD({ position, gameMode, score }) {
     });
 
     // Player dot
-    ctx.fillStyle = '#ff6b35';
+    ctx.fillStyle = '#2DD4A8';
     ctx.beginPath();
     ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
     ctx.fill();
 
     // Player heading indicator
     const headingRad = -(heading * Math.PI) / 180 + Math.PI / 2;
-    ctx.strokeStyle = '#ff6b35';
+    ctx.strokeStyle = '#2DD4A8';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(centerX, centerY);
