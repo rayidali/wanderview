@@ -7,7 +7,6 @@ export default function MissionPanel({ mission, position, onComplete }) {
   useEffect(() => {
     if (!mission || !position || !mission.target) return;
 
-    // Calculate distance to target
     const dlat = (mission.target.lat - position.lat) * 111320;
     const dlng =
       (mission.target.lng - position.lng) *
@@ -15,19 +14,16 @@ export default function MissionPanel({ mission, position, onComplete }) {
       Math.cos((position.lat * Math.PI) / 180);
     const distance = Math.sqrt(dlat * dlat + dlng * dlng);
 
-    // Progress based on proximity (starts tracking from 500m)
     const maxDist = 500;
     const pct = Math.max(0, Math.min(100, ((maxDist - distance) / maxDist) * 100));
     setProgress(pct);
 
-    // Complete when within 30m
     if (distance < 30 && !completed) {
       setCompleted(true);
       if (onComplete) onComplete(mission);
     }
   }, [mission, position, completed, onComplete]);
 
-  // Reset completed state when mission changes
   useEffect(() => {
     setCompleted(false);
     setProgress(0);
@@ -39,17 +35,14 @@ export default function MissionPanel({ mission, position, onComplete }) {
     <div className="mission-panel">
       <div className="mission-card">
         <div className="mission-header">
-          <span className="mission-icon">{completed ? '✅' : '🎯'}</span>
+          <div className={`mission-status-dot ${completed ? 'completed' : ''}`} />
           <span className="mission-title">
-            {completed ? 'Mission Complete!' : 'Current Mission'}
+            {completed ? 'Completed' : 'Active Mission'}
           </span>
         </div>
-        <div className="mission-description">
-          <strong>{mission.title}</strong>
-          <br />
-          {mission.description}
-        </div>
-        <div className="mission-progress">
+        <div className="mission-name">{mission.title}</div>
+        <div className="mission-description">{mission.description}</div>
+        <div className="mission-progress-track">
           <div
             className="mission-progress-fill"
             style={{ width: `${progress}%` }}
@@ -59,9 +52,7 @@ export default function MissionPanel({ mission, position, onComplete }) {
           <div className="mission-hint">{mission.hint}</div>
         )}
         {completed && mission.reward && (
-          <div className="mission-hint" style={{ color: 'var(--teal)', fontWeight: 600 }}>
-            +{mission.reward} points!
-          </div>
+          <div className="mission-reward">+{mission.reward} points!</div>
         )}
       </div>
     </div>

@@ -5,63 +5,48 @@
  */
 
 (function () {
-  const scene = document.querySelector('#game-scene');
-  const loadingScreen = document.getElementById('loading-screen');
+  var scene = document.querySelector('#game-scene');
+  var loadingScreen = document.getElementById('loading-screen');
+  var isReady = false;
 
-  let isReady = false;
-
-  // Wait for A-Frame scene to load
-  if (scene) {
-    scene.addEventListener('loaded', function () {
-      console.log('A-Frame scene loaded');
-      onSceneReady();
+  // Register loading screen click handler immediately
+  // (not gated behind scene.loaded — so it always works)
+  if (loadingScreen) {
+    loadingScreen.addEventListener('click', function () {
+      loadingScreen.classList.add('hidden');
+      if (scene && scene.canvas && scene.canvas.requestPointerLock) {
+        scene.canvas.requestPointerLock();
+      }
     });
   }
 
-  function onSceneReady() {
-    // Hide loading screen on first click (pointer lock)
+  function markReady() {
+    if (isReady) return;
+    isReady = true;
+    if (window.gameEngine) window.gameEngine.setReady();
     if (loadingScreen) {
-      loadingScreen.addEventListener('click', function () {
-        loadingScreen.classList.add('hidden');
-        // Request pointer lock after dismissing loading screen
-        const canvas = scene.canvas;
-        if (canvas && canvas.requestPointerLock) {
-          canvas.requestPointerLock();
-        }
-      });
+      loadingScreen.querySelector('.loader-fill').style.width = '100%';
+      var hint = loadingScreen.querySelector('.loader-hint');
+      hint.textContent = 'Click to start exploring';
+      hint.classList.add('pulse');
     }
+  }
 
-    // If tiles are loading, listen for ready event
-    window.addEventListener('tilesReady', function () {
-      isReady = true;
-      if (loadingScreen) {
-        loadingScreen.querySelector('.loader-fill').style.width = '100%';
-        loadingScreen.querySelector('.loader-hint').textContent = 'Click to start exploring';
-        loadingScreen.querySelector('.loader-hint').classList.add('pulse');
-      }
+  // Scene lifecycle
+  if (scene) {
+    scene.addEventListener('loaded', function () {
+      console.log('A-Frame scene loaded');
     });
-
-    // Set a timeout to show ready state even without tiles
-    setTimeout(function () {
-      if (!isReady) {
-        isReady = true;
-        if (window.gameEngine) window.gameEngine.setReady();
-        if (loadingScreen) {
-          loadingScreen.querySelector('.loader-fill').style.width = '100%';
-          loadingScreen.querySelector('.loader-hint').textContent = 'Click to start exploring';
-          loadingScreen.querySelector('.loader-hint').classList.add('pulse');
-        }
-      }
-    }, 3000);
-
-    // Track position updates at lower frequency for perf
-    let lastUpdate = 0;
     scene.addEventListener('renderstart', function () {
       console.log('Rendering started');
     });
   }
 
-  // Keyboard shortcut: press M to toggle minimap
+  // Tiles-ready event or 3-second fallback
+  window.addEventListener('tilesReady', markReady);
+  setTimeout(markReady, 3000);
+
+  // Keyboard shortcuts
   document.addEventListener('keydown', function (e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     if (e.key === 'm' || e.key === 'M') {
