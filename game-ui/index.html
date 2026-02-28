@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hell's Kitchen Explorer</title>
+  <link rel="stylesheet" href="/css/style.css" />
+
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+
+  <!-- 3D Tiles loader for A-Frame (loader-3dtiles) -->
+  <script src="https://cdn.jsdelivr.net/npm/three-loader-3dtiles@1.8.10/dist/lib/three-loader-3dtiles.min.js"></script>
+
+  <!-- Game engine scripts -->
+  <script src="/js/bridge.js"></script>
+  <script src="/js/tiles-component.js"></script>
+  <script src="/js/controls.js"></script>
+  <script src="/js/engine.js"></script>
+  <script src="/js/navigation.js"></script>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loader-content">
+      <h1>HELL'S KITCHEN EXPLORER</h1>
+      <p class="loader-subtitle">Loading the streets of New York...</p>
+      <div class="loader-bar"><div class="loader-fill"></div></div>
+      <p class="loader-hint">Click to start exploring</p>
+    </div>
+  </div>
+
+  <!-- A-Frame 3D Scene (Person A: full-screen 3D world) -->
+  <a-scene
+    id="game-scene"
+    vr-mode-ui="enabled: false"
+    renderer="colorManagement: true; sortObjects: true; physicallyCorrectLights: true; logarithmicDepthBuffer: true"
+    fog="type: exponential; color: #9dc4e0; density: 0.00015"
+    loading-screen="enabled: false"
+  >
+    <!-- Lighting -->
+    <a-entity light="type: ambient; color: #b4c8d8; intensity: 0.6"></a-entity>
+    <a-entity light="type: directional; color: #ffeedd; intensity: 1.2"
+              position="-1 2 1"
+              light="castShadow: true"></a-entity>
+
+    <!-- Sky -->
+    <a-sky color="#87CEEB"></a-sky>
+
+    <!-- Google 3D Tiles -->
+    <a-entity id="tiles-entity" google-3dtiles></a-entity>
+
+    <!-- Player Camera Rig -->
+    <a-entity id="player-rig" position="0 0 0">
+      <a-entity id="player-camera"
+                camera="fov: 75; near: 0.5; far: 10000"
+                position="0 1.6 0"
+                fps-look-controls
+                wasd-movement="speed: 8; fly: false">
+      </a-entity>
+    </a-entity>
+  </a-scene>
+
+  <!-- React overlay mount point (Person B: transparent React overlay) -->
+  <div id="game-ui"></div>
+
+  <!-- React app entry -->
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
