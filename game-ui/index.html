@@ -12,8 +12,15 @@
   <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 
-  <!-- 3D Tiles loader for A-Frame (loader-3dtiles) -->
-  <script src="https://cdn.jsdelivr.net/npm/three-loader-3dtiles@1.8.10/dist/lib/three-loader-3dtiles.min.js"></script>
+  <!-- Inject API keys before game scripts (Vite replaces %VITE_*% at build time) -->
+  <script>
+    (function() {
+      var gk = '%VITE_GOOGLE_API_KEY%';
+      if (gk && gk.indexOf('VITE_GOOGLE') === -1) window.WANDERVIEW_GOOGLE_API_KEY = gk;
+      var mk = '%VITE_MISTRAL_API_KEY%';
+      if (mk && mk.indexOf('VITE_MISTRAL') === -1) window.WANDERVIEW_MISTRAL_API_KEY = mk;
+    })();
+  </script>
 
   <!-- Game engine scripts -->
   <script src="/js/bridge.js"></script>
