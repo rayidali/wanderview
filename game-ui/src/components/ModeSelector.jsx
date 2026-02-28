@@ -4,7 +4,7 @@ const MODES = [
   {
     id: 'explorer',
     name: 'Explorer Mode',
-    description: 'Free walk through Hell\'s Kitchen. The AI narrates as you explore.',
+    description: 'Free walk through the neighborhood. The AI narrates as you explore.',
   },
   {
     id: 'scavenger',

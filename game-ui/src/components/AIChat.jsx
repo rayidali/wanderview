@@ -89,7 +89,7 @@ export default function AIChat({ position, gameMode, mission }) {
       <div className="chat-messages">
         {messages.length === 0 && expanded && (
           <div className="chat-message ai">
-            Welcome to Hell's Kitchen, explorer! Ask me anything about the neighborhood, or just keep walking — I'll narrate as you go.
+            Welcome to WanderView! Ask me anything about the neighborhood, or just keep walking — I'll narrate as you go.
           </div>
         )}
         {messages.map((msg, i) => (

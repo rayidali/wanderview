@@ -5,7 +5,7 @@
 
 const PLACES_API_URL = 'https://places.googleapis.com/v1/places:searchNearby';
 
-let apiKey = '';
+let apiKey = import.meta.env.VITE_GOOGLE_API_KEY || '';
 const cache = new Map();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 const CACHE_RADIUS = 0.001; // ~100m in degrees — reuse cache within this radius

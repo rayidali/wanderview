@@ -59,7 +59,7 @@ export default function MissionPanel({ mission, position, onComplete }) {
           <div className="mission-hint">{mission.hint}</div>
         )}
         {completed && mission.reward && (
-          <div className="mission-hint" style={{ color: '#f7c948' }}>
+          <div className="mission-hint" style={{ color: 'var(--teal)', fontWeight: 600 }}>
             +{mission.reward} points!
           </div>
         )}

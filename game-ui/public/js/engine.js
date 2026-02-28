@@ -36,7 +36,7 @@
       isReady = true;
       if (loadingScreen) {
         loadingScreen.querySelector('.loader-fill').style.width = '100%';
-        loadingScreen.querySelector('.loader-hint').textContent = 'Click to explore Hell\'s Kitchen';
+        loadingScreen.querySelector('.loader-hint').textContent = 'Click to start exploring';
         loadingScreen.querySelector('.loader-hint').classList.add('pulse');
       }
     });
@@ -48,7 +48,7 @@
         if (window.gameEngine) window.gameEngine.setReady();
         if (loadingScreen) {
           loadingScreen.querySelector('.loader-fill').style.width = '100%';
-          loadingScreen.querySelector('.loader-hint').textContent = 'Click to explore Hell\'s Kitchen';
+          loadingScreen.querySelector('.loader-hint').textContent = 'Click to start exploring';
           loadingScreen.querySelector('.loader-hint').classList.add('pulse');
         }
       }
