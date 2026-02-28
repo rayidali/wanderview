@@ -5,48 +5,52 @@
  */
 
 (function () {
-  var scene = document.querySelector('#game-scene');
-  var loadingScreen = document.getElementById('loading-screen');
-  var isReady = false;
+  // Wait for DOM to be fully parsed before querying body elements.
+  // These scripts load in <head>, but #loading-screen and #game-scene
+  // are in <body> — so they don't exist yet at script execution time.
+  document.addEventListener('DOMContentLoaded', function () {
+    var scene = document.querySelector('#game-scene');
+    var loadingScreen = document.getElementById('loading-screen');
+    var isReady = false;
 
-  // Register loading screen click handler immediately
-  // (not gated behind scene.loaded — so it always works)
-  if (loadingScreen) {
-    loadingScreen.addEventListener('click', function () {
-      loadingScreen.classList.add('hidden');
-      if (scene && scene.canvas && scene.canvas.requestPointerLock) {
-        scene.canvas.requestPointerLock();
-      }
-    });
-  }
-
-  function markReady() {
-    if (isReady) return;
-    isReady = true;
-    if (window.gameEngine) window.gameEngine.setReady();
+    // Register loading screen click handler
     if (loadingScreen) {
-      loadingScreen.querySelector('.loader-fill').style.width = '100%';
-      var hint = loadingScreen.querySelector('.loader-hint');
-      hint.textContent = 'Click to start exploring';
-      hint.classList.add('pulse');
+      loadingScreen.addEventListener('click', function () {
+        loadingScreen.classList.add('hidden');
+        if (scene && scene.canvas && scene.canvas.requestPointerLock) {
+          scene.canvas.requestPointerLock();
+        }
+      });
     }
-  }
 
-  // Scene lifecycle
-  if (scene) {
-    scene.addEventListener('loaded', function () {
-      console.log('A-Frame scene loaded');
-    });
-    scene.addEventListener('renderstart', function () {
-      console.log('Rendering started');
-    });
-  }
+    function markReady() {
+      if (isReady) return;
+      isReady = true;
+      if (window.gameEngine) window.gameEngine.setReady();
+      if (loadingScreen) {
+        loadingScreen.querySelector('.loader-fill').style.width = '100%';
+        var hint = loadingScreen.querySelector('.loader-hint');
+        hint.textContent = 'Click to start exploring';
+        hint.classList.add('pulse');
+      }
+    }
 
-  // Tiles-ready event or 3-second fallback
-  window.addEventListener('tilesReady', markReady);
-  setTimeout(markReady, 3000);
+    // Scene lifecycle
+    if (scene) {
+      scene.addEventListener('loaded', function () {
+        console.log('A-Frame scene loaded');
+      });
+      scene.addEventListener('renderstart', function () {
+        console.log('Rendering started');
+      });
+    }
 
-  // Keyboard shortcuts
+    // Tiles-ready event or 3-second fallback
+    window.addEventListener('tilesReady', markReady);
+    setTimeout(markReady, 3000);
+  });
+
+  // Keyboard shortcuts (safe to register on document immediately)
   document.addEventListener('keydown', function (e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     if (e.key === 'm' || e.key === 'M') {
