@@ -4,7 +4,8 @@
   "description": "First-person walking game in Hell's Kitchen NYC with Mistral AI game master",
   "scripts": {
     "dev": "cd game-ui && npm run dev",
-    "build": "cd game-ui && npm run build",
-    "preview": "cd game-ui && npm run preview"
+    "build": "cd game-ui && npm install && npm run build",
+    "preview": "cd game-ui && npm run preview",
+    "postinstall": "cd game-ui && npm install"
   }
 }
