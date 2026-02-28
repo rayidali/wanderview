@@ -4,12 +4,10 @@ import HUD from './components/HUD';
 import MissionPanel from './components/MissionPanel';
 import AIChat from './components/AIChat';
 import ModeSelector from './components/ModeSelector';
-import ApiKeyPrompt from './components/ApiKeyPrompt';
 import { setApiKey as setMistralApiKey, getNarration, generateMission, hasApiKey as hasMistralKey } from './services/mistral';
 import { setApiKey as setPlacesApiKey, getNearbyPlaces } from './services/places';
 
-// Expose API keys to vanilla JS (redundant with inline <script> in index.html,
-// but covers the case where React loads before the inline script executes)
+// Expose API keys to vanilla JS layer (also done in inline <script> in index.html)
 if (import.meta.env.VITE_GOOGLE_API_KEY) {
   window.WANDERVIEW_GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
 }
@@ -17,22 +15,12 @@ if (import.meta.env.VITE_MISTRAL_API_KEY) {
   window.WANDERVIEW_MISTRAL_API_KEY = import.meta.env.VITE_MISTRAL_API_KEY;
 }
 
-// Game flow states
-const FLOW_API_KEYS = 'api_keys';
+// Game flow states — go straight to mode select (no API key prompt)
 const FLOW_MODE_SELECT = 'mode_select';
 const FLOW_PLAYING = 'playing';
 
-// Skip API key prompt if env vars are set (check both Vite build-time vars
-// AND window globals set by the inline script — covers Production + Preview)
-const hasEnvKeys = !!(
-  import.meta.env.VITE_MISTRAL_API_KEY ||
-  import.meta.env.VITE_GOOGLE_API_KEY ||
-  window.WANDERVIEW_GOOGLE_API_KEY ||
-  window.WANDERVIEW_MISTRAL_API_KEY
-);
-
 export default function App() {
-  const [flow, setFlow] = useState(hasEnvKeys ? FLOW_MODE_SELECT : FLOW_API_KEYS);
+  const [flow, setFlow] = useState(FLOW_MODE_SELECT);
   const [gameMode, setGameMode] = useState('explorer');
   const [position, setPosition] = useState({ lat: 40.7608, lng: -73.9941, heading: 0 });
   const [narration, setNarration] = useState('');
@@ -52,13 +40,6 @@ export default function App() {
     });
 
     return unsub;
-  }, []);
-
-  // Handle API keys
-  const handleApiKeys = useCallback(({ mistralKey, googleKey }) => {
-    if (mistralKey) setMistralApiKey(mistralKey);
-    if (googleKey) setPlacesApiKey(googleKey);
-    setFlow(FLOW_MODE_SELECT);
   }, []);
 
   // Handle mode selection
@@ -159,9 +140,6 @@ export default function App() {
 
   return (
     <>
-      {/* API Key Prompt */}
-      {flow === FLOW_API_KEYS && <ApiKeyPrompt onSubmit={handleApiKeys} />}
-
       {/* Mode Selector */}
       {flow === FLOW_MODE_SELECT && (
         <ModeSelector visible={true} onSelect={handleModeSelect} />
