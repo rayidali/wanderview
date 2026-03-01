@@ -1,9 +1,8 @@
 /**
  * tiles-component.js — Google 3D Tiles A-Frame Component
  *
- * Uses the Vite-bundled three-loader-3dtiles (via window.loadGoogleTiles)
- * to load Google Photorealistic 3D Tiles — the same library Kieran Farr
- * uses in his demos.
+ * Uses the UMD build of three-loader-3dtiles (loaded before this script)
+ * which re-uses A-Frame's window.THREE — no dual Three.js instances.
  *
  * Strategy: always render fallback scene first, then layer real tiles on top.
  */
@@ -51,25 +50,37 @@ AFRAME.registerComponent('google-3dtiles', {
       self._loadGoogleTiles(apiKey);
     }
 
-    // Wait for Vite-bundled tiles loader to be ready
-    if (window.loadGoogleTiles) {
+    // The UMD build is loaded synchronously via script tag before this file
+    if (window.ThreeLoader3DTiles) {
       tryLoad();
     } else {
-      window.addEventListener('tilesLoaderReady', tryLoad);
+      console.warn('three-loader-3dtiles UMD not found, skipping Google 3D Tiles');
     }
   },
 
   _loadGoogleTiles: async function (apiKey) {
-    var self = this;
-
     try {
       console.log('Loading Google Photorealistic 3D Tiles...');
 
-      var result = await window.loadGoogleTiles({
-        apiKey: apiKey,
+      var Loader3DTiles = window.ThreeLoader3DTiles.Loader3DTiles;
+
+      var result = await Loader3DTiles.load({
+        url: 'https://tile.googleapis.com/v1/3dtiles/root.json',
         renderer: this.el.sceneEl.renderer,
+        options: {
+          googleApiKey: apiKey,
+          maximumScreenSpaceError: 48,
+          maximumMemoryUsage: 128,
+          updateTransforms: true,
+          dracoDecoderPath: 'https://www.gstatic.com/draco/versioned/decoders/1.5.7/',
+          basisTranscoderPath: 'https://cdn.jsdelivr.net/npm/three@0.164.0/examples/jsm/libs/basis/',
+        },
+      });
+
+      // Orient the globe to Hell's Kitchen, NYC
+      result.runtime.orientToGeocoord({
         lat: this.data.lat,
-        lng: this.data.lng,
+        long: this.data.lng,
         height: this.data.height,
       });
 
@@ -216,7 +227,7 @@ AFRAME.registerComponent('google-3dtiles', {
   tick: function (t, dt) {
     if (this.tilesRuntime) {
       try {
-        this.tilesRuntime.update(dt, this.el.sceneEl.renderer, this.el.sceneEl.camera);
+        this.tilesRuntime.update(dt, this.el.sceneEl.camera);
       } catch (err) {
         console.error('Tiles runtime error, disabling:', err.message);
         this.tilesRuntime = null;
