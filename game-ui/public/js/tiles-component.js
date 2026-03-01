@@ -280,7 +280,8 @@ AFRAME.registerComponent('google-3dtiles', {
   tick: function (t, dt) {
     if (this.tilesRuntime) {
       try {
-        this.tilesRuntime.update(dt, this.el.sceneEl.camera);
+        var viewportHeight = this.el.sceneEl.canvas ? this.el.sceneEl.canvas.height : window.innerHeight;
+        this.tilesRuntime.update(dt || 0, viewportHeight, this.el.sceneEl.camera);
       } catch (err) {
         console.error('Tiles runtime error, disabling:', err.message);
         this.tilesRuntime = null;
