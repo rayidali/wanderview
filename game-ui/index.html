@@ -19,9 +19,17 @@
   <script>
     (function() {
       var gk = '%VITE_GOOGLE_API_KEY%';
-      if (gk && gk.indexOf('VITE_GOOGLE') === -1) window.WANDERVIEW_GOOGLE_API_KEY = gk;
+      if (gk && gk.indexOf('VITE_GOOGLE') === -1) {
+        window.WANDERVIEW_GOOGLE_API_KEY = gk;
+        console.log('[WanderView] Google API key injected via HTML (' + gk.substring(0, 8) + '...)');
+      } else {
+        console.warn('[WanderView] Google API key NOT injected via HTML (raw value: "' + gk.substring(0, 20) + '...")');
+      }
       var mk = '%VITE_MISTRAL_API_KEY%';
-      if (mk && mk.indexOf('VITE_MISTRAL') === -1) window.WANDERVIEW_MISTRAL_API_KEY = mk;
+      if (mk && mk.indexOf('VITE_MISTRAL') === -1) {
+        window.WANDERVIEW_MISTRAL_API_KEY = mk;
+        console.log('[WanderView] Mistral API key injected via HTML');
+      }
     })();
   </script>
 

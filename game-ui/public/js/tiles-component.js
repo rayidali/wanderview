@@ -7,6 +7,32 @@
  * Strategy: always render fallback scene first, then layer real tiles on top.
  */
 
+// Diagnostic: test tiles from browser console via window.testTiles('YOUR_KEY')
+window.testTiles = async function(apiKey) {
+  apiKey = apiKey || window.WANDERVIEW_GOOGLE_API_KEY;
+  if (!apiKey) { console.error('No API key. Usage: testTiles("AIza...")'); return; }
+  console.log('Testing with key:', apiKey.substring(0, 8) + '...');
+  try {
+    var resp = await fetch('https://tile.googleapis.com/v1/3dtiles/root.json?key=' + apiKey);
+    console.log('root.json:', resp.status, resp.statusText);
+    if (!resp.ok) { console.error('Body:', await resp.text()); return; }
+    var json = await resp.json();
+    console.log('Tileset version:', json.asset?.version, '| Children:', json.root?.children?.length);
+    // Test loading a child tile
+    if (json.root?.children?.[0]?.content?.uri) {
+      var childUrl = 'https://tile.googleapis.com' + json.root.children[0].content.uri;
+      var childResp = await fetch(childUrl);
+      console.log('Child tile:', childResp.status, childResp.statusText, '(' + childUrl.substring(0, 80) + '...)');
+    }
+    console.log('API key works! If tiles still fail, the issue is in the loader.');
+    // Check loader availability
+    console.log('ThreeLoader3DTiles:', !!window.ThreeLoader3DTiles);
+    console.log('THREE.GLTFLoader:', !!THREE.GLTFLoader);
+    console.log('THREE.DRACOLoader:', !!THREE.DRACOLoader);
+    console.log('THREE.KTX2Loader:', !!THREE.KTX2Loader);
+  } catch (e) { console.error('Test failed:', e.message); }
+};
+
 AFRAME.registerComponent('google-3dtiles', {
   schema: {
     lat: { type: 'number', default: 40.7608 },
@@ -25,8 +51,11 @@ AFRAME.registerComponent('google-3dtiles', {
 
     // Then attempt real Google 3D Tiles
     var apiKey = this._getApiKey();
+    console.log('[3DTiles] API key status:', apiKey ? 'found (' + apiKey.substring(0, 8) + '...)' : 'MISSING');
     if (apiKey) {
       this._attemptGoogleTiles(apiKey);
+    } else {
+      console.warn('[3DTiles] No API key found. Checked: window.WANDERVIEW_GOOGLE_API_KEY, meta[name=google-api-key], window.GOOGLE_API_KEY');
     }
   },
 
@@ -44,26 +73,46 @@ AFRAME.registerComponent('google-3dtiles', {
     function tryLoad() {
       // Wait for A-Frame renderer
       if (!sceneEl.renderer || !sceneEl.camera) {
+        console.log('[3DTiles] Waiting for A-Frame renderer...');
         sceneEl.addEventListener('renderstart', tryLoad);
         return;
       }
+      console.log('[3DTiles] A-Frame renderer ready, loading tiles...');
       self._loadGoogleTiles(apiKey);
     }
 
     // The UMD build is loaded synchronously via script tag before this file
     if (window.ThreeLoader3DTiles) {
+      console.log('[3DTiles] UMD build found, Loader3DTiles:', !!window.ThreeLoader3DTiles.Loader3DTiles);
       tryLoad();
     } else {
-      console.warn('three-loader-3dtiles UMD not found, skipping Google 3D Tiles');
+      console.error('[3DTiles] three-loader-3dtiles UMD not found on window.ThreeLoader3DTiles');
     }
   },
 
   _loadGoogleTiles: async function (apiKey) {
     try {
-      console.log('Loading Google Photorealistic 3D Tiles...');
+      console.log('[3DTiles] Loading Google Photorealistic 3D Tiles...');
+      console.log('[3DTiles] THREE.GLTFLoader available:', !!THREE.GLTFLoader);
+      console.log('[3DTiles] THREE.DRACOLoader available:', !!THREE.DRACOLoader);
 
       var Loader3DTiles = window.ThreeLoader3DTiles.Loader3DTiles;
 
+      // First, verify the API key works by testing root.json
+      console.log('[3DTiles] Testing API key with root.json fetch...');
+      try {
+        var testResp = await fetch('https://tile.googleapis.com/v1/3dtiles/root.json?key=' + apiKey);
+        console.log('[3DTiles] root.json response:', testResp.status, testResp.statusText);
+        if (!testResp.ok) {
+          var errBody = await testResp.text();
+          console.error('[3DTiles] API key test failed:', errBody);
+          return;
+        }
+      } catch (fetchErr) {
+        console.error('[3DTiles] API key test fetch error:', fetchErr.message);
+      }
+
+      console.log('[3DTiles] Calling Loader3DTiles.load()...');
       var result = await Loader3DTiles.load({
         url: 'https://tile.googleapis.com/v1/3dtiles/root.json',
         renderer: this.el.sceneEl.renderer,
@@ -77,7 +126,10 @@ AFRAME.registerComponent('google-3dtiles', {
         },
       });
 
+      console.log('[3DTiles] Loader returned:', { model: !!result.model, runtime: !!result.runtime });
+
       // Orient the globe to Hell's Kitchen, NYC
+      console.log('[3DTiles] Orienting to geo coords:', { lat: this.data.lat, long: this.data.lng, height: this.data.height });
       result.runtime.orientToGeocoord({
         lat: this.data.lat,
         long: this.data.lng,
@@ -94,9 +146,10 @@ AFRAME.registerComponent('google-3dtiles', {
         this.fallbackEl.setAttribute('visible', 'false');
       }
 
-      console.log('Google 3D Tiles loaded successfully');
+      console.log('[3DTiles] Google 3D Tiles loaded successfully!');
     } catch (err) {
-      console.warn('Google 3D Tiles failed:', err.message);
+      console.error('[3DTiles] Google 3D Tiles failed:', err.message);
+      console.error('[3DTiles] Stack:', err.stack);
       // Fallback scene stays visible
     }
   },
