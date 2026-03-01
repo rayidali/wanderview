@@ -1,32 +1,33 @@
 /**
  * tiles-component.js — Google 3D Tiles A-Frame Component
  *
- * Strategy: ALWAYS render the fallback scene (ground + buildings) first
- * so the user sees something immediately. Then attempt to load Google
- * Photorealistic 3D Tiles on top. If tiles load, hide the fallback.
- * If they fail, the fallback stays visible.
+ * Uses the Vite-bundled three-loader-3dtiles (via window.loadGoogleTiles)
+ * to load Google Photorealistic 3D Tiles — the same library Kieran Farr
+ * uses in his demos.
+ *
+ * Strategy: always render fallback scene first, then layer real tiles on top.
  */
 
 AFRAME.registerComponent('google-3dtiles', {
   schema: {
     lat: { type: 'number', default: 40.7608 },
     lng: { type: 'number', default: -73.9941 },
+    height: { type: 'number', default: 0 },
   },
 
   init: function () {
-    this.tilesRenderer = null;
-    this.container = null;
+    this.tilesRuntime = null;
+    this.tilesModel = null;
     this.fallbackEl = null;
-    this.tilesWorking = false;
 
-    // ALWAYS load fallback scene first so user sees something
+    // Always show fallback scene first
     this._loadFallbackScene();
     this._signalReady();
 
-    // Then try to load real 3D tiles on top
+    // Then attempt real Google 3D Tiles
     var apiKey = this._getApiKey();
     if (apiKey) {
-      this._loadTiles(apiKey);
+      this._attemptGoogleTiles(apiKey);
     }
   },
 
@@ -37,98 +38,59 @@ AFRAME.registerComponent('google-3dtiles', {
     return window.GOOGLE_API_KEY || '';
   },
 
-  _loadTiles: async function (apiKey) {
-    var sceneEl = this.el.sceneEl;
+  _attemptGoogleTiles: function (apiKey) {
     var self = this;
+    var sceneEl = this.el.sceneEl;
 
-    // Wait for A-Frame renderer to be ready
-    function waitForRenderer() {
-      return new Promise(function (resolve) {
-        if (sceneEl.camera && sceneEl.renderer) {
-          resolve();
-        } else {
-          sceneEl.addEventListener('renderstart', resolve);
-        }
-      });
+    function tryLoad() {
+      // Wait for A-Frame renderer
+      if (!sceneEl.renderer || !sceneEl.camera) {
+        sceneEl.addEventListener('renderstart', tryLoad);
+        return;
+      }
+      self._loadGoogleTiles(apiKey);
     }
 
+    // Wait for Vite-bundled tiles loader to be ready
+    if (window.loadGoogleTiles) {
+      tryLoad();
+    } else {
+      window.addEventListener('tilesLoaderReady', tryLoad);
+    }
+  },
+
+  _loadGoogleTiles: async function (apiKey) {
+    var self = this;
+
     try {
-      await waitForRenderer();
+      console.log('Loading Google Photorealistic 3D Tiles...');
 
-      var camera = sceneEl.camera;
-      var renderer = sceneEl.renderer;
+      var result = await window.loadGoogleTiles({
+        apiKey: apiKey,
+        renderer: this.el.sceneEl.renderer,
+        lat: this.data.lat,
+        lng: this.data.lng,
+        height: this.data.height,
+      });
 
-      // Import 3d-tiles-renderer from esm.sh
-      // Pin Three.js version to match A-Frame 1.6.0 (r169) to minimize conflicts
-      var results = await Promise.all([
-        import('https://esm.sh/3d-tiles-renderer@0.4.21?external=three'),
-        import('https://esm.sh/3d-tiles-renderer@0.4.21/plugins?external=three'),
-      ]);
+      // Add the tiles model to the scene
+      this.el.sceneEl.object3D.add(result.model);
+      this.tilesModel = result.model;
+      this.tilesRuntime = result.runtime;
 
-      var TilesRenderer = results[0].TilesRenderer;
-      var GoogleCloudAuthPlugin = results[1].GoogleCloudAuthPlugin;
-
-      if (!TilesRenderer || !GoogleCloudAuthPlugin) {
-        throw new Error('TilesRenderer or GoogleCloudAuthPlugin not found');
+      // Hide fallback scene
+      if (this.fallbackEl) {
+        this.fallbackEl.setAttribute('visible', 'false');
       }
 
-      var tiles = new TilesRenderer();
-      tiles.registerPlugin(new GoogleCloudAuthPlugin({ apiToken: apiKey }));
-      tiles.setCamera(camera);
-      tiles.setResolutionFromRenderer(camera, renderer);
-
-      // ECEF → Local coordinate transformation
-      var THREE = AFRAME.THREE;
-      var lat = this.data.lat * Math.PI / 180;
-      var lng = this.data.lng * Math.PI / 180;
-      var sinLat = Math.sin(lat), cosLat = Math.cos(lat);
-      var sinLng = Math.sin(lng), cosLng = Math.cos(lng);
-
-      var WGS84_A = 6378137.0;
-      var e2 = 0.00669437999014;
-      var N = WGS84_A / Math.sqrt(1 - e2 * sinLat * sinLat);
-      var ecefX = N * cosLat * cosLng;
-      var ecefY = N * cosLat * sinLng;
-      var ecefZ = N * (1 - e2) * sinLat;
-
-      var tx = -sinLng * ecefX + cosLng * ecefY;
-      var ty = cosLat * cosLng * ecefX + cosLat * sinLng * ecefY + sinLat * ecefZ;
-      var tz = sinLat * cosLng * ecefX + sinLat * sinLng * ecefY - cosLat * ecefZ;
-
-      var transform = new THREE.Matrix4();
-      transform.set(
-        -sinLng,          cosLng,           0,       -tx,
-         cosLat * cosLng,  cosLat * sinLng,  sinLat,  -ty,
-         sinLat * cosLng,  sinLat * sinLng, -cosLat,  -tz,
-         0,                0,                0,         1
-      );
-
-      var container = new THREE.Group();
-      container.matrixAutoUpdate = false;
-      container.matrix.copy(transform);
-      container.matrixWorldNeedsUpdate = true;
-      container.add(tiles.group);
-
-      sceneEl.object3D.add(container);
-
-      self.tilesRenderer = tiles;
-      self.container = container;
-      self.tilesWorking = true;
-
-      // Hide fallback scene after tiles start loading
-      if (self.fallbackEl) {
-        self.fallbackEl.setAttribute('visible', 'false');
-      }
-
-      console.log('Google 3D Tiles initialized for Hell\'s Kitchen');
+      console.log('Google 3D Tiles loaded successfully');
     } catch (err) {
-      console.warn('Google 3D Tiles failed to load, keeping fallback scene:', err.message);
-      // Fallback scene is already visible — no action needed
+      console.warn('Google 3D Tiles failed:', err.message);
+      // Fallback scene stays visible
     }
   },
 
   _loadFallbackScene: function () {
-    // Create a container entity for all fallback geometry
     var container = document.createElement('a-entity');
     container.setAttribute('id', 'fallback-scene');
     this.el.appendChild(container);
@@ -145,7 +107,6 @@ AFRAME.registerComponent('google-3dtiles', {
 
     this._createStreetGrid(container);
     this._createBuildings(container);
-
     console.log('Fallback scene loaded');
   },
 
@@ -252,21 +213,13 @@ AFRAME.registerComponent('google-3dtiles', {
     }
   },
 
-  tick: function () {
-    // Only update tiles renderer if it was successfully created
-    // Wrap in try/catch so a crash here doesn't kill A-Frame's render loop
-    if (this.tilesRenderer && this.tilesWorking) {
+  tick: function (t, dt) {
+    if (this.tilesRuntime) {
       try {
-        var camera = this.el.sceneEl.camera;
-        if (camera) {
-          this.tilesRenderer.setCamera(camera);
-          this.tilesRenderer.update();
-        }
+        this.tilesRuntime.update(dt, this.el.sceneEl.renderer, this.el.sceneEl.camera);
       } catch (err) {
-        // Tiles renderer is corrupting the render loop — disable it
-        console.error('Tiles renderer crashed, disabling:', err.message);
-        this.tilesWorking = false;
-        // Show fallback scene again
+        console.error('Tiles runtime error, disabling:', err.message);
+        this.tilesRuntime = null;
         if (this.fallbackEl) {
           this.fallbackEl.setAttribute('visible', 'true');
         }
@@ -275,11 +228,11 @@ AFRAME.registerComponent('google-3dtiles', {
   },
 
   remove: function () {
-    if (this.tilesRenderer) {
-      try { this.tilesRenderer.dispose(); } catch (e) { /* ignore */ }
+    if (this.tilesRuntime) {
+      try { this.tilesRuntime.dispose(); } catch (e) { /* ignore */ }
     }
-    if (this.container && this.container.parent) {
-      this.container.parent.remove(this.container);
+    if (this.tilesModel && this.tilesModel.parent) {
+      this.tilesModel.parent.remove(this.tilesModel);
     }
   },
 });
