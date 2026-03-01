@@ -146,14 +146,14 @@ a-scene {
   height: 100%;
   background: var(--green);
   border-radius: var(--r-full);
-  transition: width 2s ease;
-  animation: load-progress 2.5s ease forwards;
+  transition: width 0.4s ease;
+  animation: load-progress 1.5s ease forwards;
 }
 
 @keyframes load-progress {
   0% { width: 0%; }
-  60% { width: 70%; }
-  100% { width: 90%; }
+  50% { width: 60%; }
+  100% { width: 100%; }
 }
 
 .loader-hint {

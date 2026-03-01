@@ -5,17 +5,48 @@
  */
 
 (function () {
-  // Wait for DOM to be fully parsed before querying body elements.
-  // These scripts load in <head>, but #loading-screen and #game-scene
-  // are in <body> — so they don't exist yet at script execution time.
+  // Track ready state at the top level so we never miss the tilesReady event
+  var isReady = false;
+
+  function markReady() {
+    if (isReady) return;
+    isReady = true;
+    if (window.gameEngine) window.gameEngine.setReady();
+
+    // Update loading screen visuals (only works after DOM is parsed)
+    var loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+      var fill = loadingScreen.querySelector('.loader-fill');
+      if (fill) fill.style.width = '100%';
+      var hint = loadingScreen.querySelector('.loader-hint');
+      if (hint) {
+        hint.textContent = 'Click to start exploring';
+        hint.classList.add('pulse');
+      }
+    }
+  }
+
+  // Listen for tilesReady immediately — tiles component may fire
+  // before DOMContentLoaded since A-Frame inits during body parse
+  window.addEventListener('tilesReady', markReady);
+
+  // Fallback: if nothing signals ready within 2 seconds of DOM parse, force it
   document.addEventListener('DOMContentLoaded', function () {
     var scene = document.querySelector('#game-scene');
     var loadingScreen = document.getElementById('loading-screen');
-    var isReady = false;
 
-    // Register loading screen click handler
+    // If tiles already signaled ready before DOM was parsed, apply visuals now
+    if (isReady || (window.gameEngine && window.gameEngine.isReady)) {
+      markReady();
+    }
+
+    // Fallback timer
+    setTimeout(markReady, 2000);
+
+    // Register loading screen click handler — only dismiss when ready
     if (loadingScreen) {
       loadingScreen.addEventListener('click', function () {
+        if (!isReady) return; // Don't let user through until ready
         loadingScreen.classList.add('hidden');
         if (scene && scene.canvas && scene.canvas.requestPointerLock) {
           scene.canvas.requestPointerLock();
@@ -23,19 +54,7 @@
       });
     }
 
-    function markReady() {
-      if (isReady) return;
-      isReady = true;
-      if (window.gameEngine) window.gameEngine.setReady();
-      if (loadingScreen) {
-        loadingScreen.querySelector('.loader-fill').style.width = '100%';
-        var hint = loadingScreen.querySelector('.loader-hint');
-        hint.textContent = 'Click to start exploring';
-        hint.classList.add('pulse');
-      }
-    }
-
-    // Scene lifecycle
+    // Scene lifecycle logging
     if (scene) {
       scene.addEventListener('loaded', function () {
         console.log('A-Frame scene loaded');
@@ -44,10 +63,6 @@
         console.log('Rendering started');
       });
     }
-
-    // Tiles-ready event or 3-second fallback
-    window.addEventListener('tilesReady', markReady);
-    setTimeout(markReady, 3000);
   });
 
   // Keyboard shortcuts (safe to register on document immediately)
