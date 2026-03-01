@@ -112,9 +112,17 @@ AFRAME.registerComponent('google-3dtiles', {
         console.error('[3DTiles] API key test fetch error:', fetchErr.message);
       }
 
+      var canvas = this.el.sceneEl.canvas;
+      var viewport = {
+        width: canvas.width,
+        height: canvas.height,
+        devicePixelRatio: window.devicePixelRatio || 1,
+      };
+      console.log('[3DTiles] Viewport:', viewport);
       console.log('[3DTiles] Calling Loader3DTiles.load()...');
       var result = await Loader3DTiles.load({
         url: 'https://tile.googleapis.com/v1/3dtiles/root.json',
+        viewport: viewport,
         renderer: this.el.sceneEl.renderer,
         options: {
           googleApiKey: apiKey,
@@ -280,8 +288,7 @@ AFRAME.registerComponent('google-3dtiles', {
   tick: function (t, dt) {
     if (this.tilesRuntime) {
       try {
-        var viewportHeight = this.el.sceneEl.canvas ? this.el.sceneEl.canvas.height : window.innerHeight;
-        this.tilesRuntime.update(dt || 0, viewportHeight, this.el.sceneEl.camera);
+        this.tilesRuntime.update(dt || 0, this.el.sceneEl.camera);
       } catch (err) {
         console.error('Tiles runtime error, disabling:', err.message);
         this.tilesRuntime = null;
