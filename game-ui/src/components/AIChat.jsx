@@ -45,11 +45,9 @@ export default function AIChat({ position, gameMode, mission }) {
     setMessages((prev) => [...prev, { role: 'user', text: userMsg }]);
     setIsLoading(true);
 
-    // Expand chat if not already
     if (!expanded) setExpanded(true);
 
     try {
-      // Get nearby places for context
       const places = await getNearbyPlaces(
         position?.lat || 40.7608,
         position?.lng || -73.9941
@@ -80,7 +78,6 @@ export default function AIChat({ position, gameMode, mission }) {
       e.preventDefault();
       sendMessage();
     }
-    // Prevent WASD from moving while typing
     e.stopPropagation();
   };
 
@@ -89,7 +86,7 @@ export default function AIChat({ position, gameMode, mission }) {
       <div className="chat-messages">
         {messages.length === 0 && expanded && (
           <div className="chat-message ai">
-            Welcome to WanderView! Ask me anything about the neighborhood, or just keep walking — I'll narrate as you go.
+            Welcome to WanderView! Ask me anything about the neighborhood, or just keep walking.
           </div>
         )}
         {messages.map((msg, i) => (
@@ -105,11 +102,11 @@ export default function AIChat({ position, gameMode, mission }) {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="chat-input-bar interactive">
+      <div className="chat-bottom-bar interactive">
         <input
           ref={inputRef}
           type="text"
-          placeholder="Ask the Game Master... (Tab to expand)"
+          placeholder="Message the Game Master..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}

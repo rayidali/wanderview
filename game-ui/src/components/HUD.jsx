@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
+const BADGE_COLORS = ['red', 'green', 'blue', 'orange', 'purple'];
+
+function formatDistance(meters) {
+  if (meters >= 1000) return `${(meters / 1000).toFixed(1)}km`;
+  return `${Math.round(meters)}m`;
+}
+
 export default function HUD({ position, gameMode, score }) {
   const [street, setStreet] = useState({ street: '46th St', avenue: '9th Ave' });
   const [heading, setHeading] = useState(0);
@@ -32,19 +39,17 @@ export default function HUD({ position, gameMode, score }) {
     const h = canvas.height;
     const centerX = w / 2;
     const centerY = h / 2;
-
-    // Scale: 1 degree lat ≈ 111km, we want ~400m to fill the minimap
-    const scale = w / 0.005; // ~500m visible
+    const scale = w / 0.005;
 
     ctx.clearRect(0, 0, w, h);
 
     // Background
-    ctx.fillStyle = '#F8FAFC';
+    ctx.fillStyle = '#F9FAFB';
     ctx.fillRect(0, 0, w, h);
 
     // Draw street grid
     const nav = window.gameNavigation;
-    ctx.strokeStyle = '#E2E8F0';
+    ctx.strokeStyle = '#E5E7EB';
     ctx.lineWidth = 1;
 
     // East-West streets
@@ -57,9 +62,8 @@ export default function HUD({ position, gameMode, score }) {
         ctx.lineTo(w, y);
         ctx.stroke();
 
-        // Label
-        ctx.fillStyle = '#94A3B8';
-        ctx.font = '8px Inter, sans-serif';
+        ctx.fillStyle = '#9CA3AF';
+        ctx.font = '500 7px Inter, sans-serif';
         ctx.fillText(st.name, 4, y - 2);
       }
     });
@@ -76,36 +80,45 @@ export default function HUD({ position, gameMode, score }) {
       }
     });
 
-    // Draw landmarks
-    nav.LANDMARKS.forEach((lm) => {
+    // Draw landmarks with colored dots
+    const colors = ['#FF3B30', '#34C759', '#007AFF', '#FF9500', '#AF52DE'];
+    nav.LANDMARKS.forEach((lm, i) => {
       const dx = (lm.lng - position.lng) * scale;
       const dy = (lm.lat - position.lat) * scale;
       const x = centerX + dx;
       const y = centerY - dy;
 
       if (x > 5 && x < w - 5 && y > 5 && y < h - 5) {
-        ctx.fillStyle = '#4A90D9';
+        ctx.fillStyle = colors[i % colors.length];
         ctx.beginPath();
-        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.arc(x, y, 3.5, 0, Math.PI * 2);
         ctx.fill();
+
+        // White border
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
       }
     });
 
-    // Player dot
-    ctx.fillStyle = '#2DD4A8';
+    // Player dot (green with white border)
+    ctx.fillStyle = '#4CD964';
     ctx.beginPath();
     ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
     ctx.fill();
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 2;
+    ctx.stroke();
 
     // Player heading indicator
     const headingRad = -(heading * Math.PI) / 180 + Math.PI / 2;
-    ctx.strokeStyle = '#2DD4A8';
+    ctx.strokeStyle = '#4CD964';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(centerX, centerY);
     ctx.lineTo(
-      centerX + Math.cos(headingRad) * 15,
-      centerY - Math.sin(headingRad) * 15
+      centerX + Math.cos(headingRad) * 14,
+      centerY - Math.sin(headingRad) * 14
     );
     ctx.stroke();
   }, [position, heading]);
@@ -134,18 +147,26 @@ export default function HUD({ position, gameMode, score }) {
         <div className="hud-mode">{modeLabels[gameMode] || 'Explorer Mode'}</div>
       </div>
 
-      {/* Compass — top right */}
-      <div className="compass">
-        <div className="compass-circle">
+      {/* Compass — top right (reference-style with red/navy needle) */}
+      <div className="compass-wrapper">
+        <div className="compass-ring">
+          <span className="compass-n">N</span>
+          <span className="compass-e">E</span>
+          <span className="compass-s">S</span>
+          <span className="compass-w">W</span>
           <div
-            className="compass-needle"
+            className="compass-needle-container"
             style={{ transform: `rotate(${-heading}deg)` }}
-          />
-          <div className="compass-label">{compassDirection}</div>
+          >
+            <div className="compass-needle-n" />
+            <div className="compass-needle-s" />
+            <div className="compass-needle-dot" />
+          </div>
         </div>
+        <div className="compass-heading">{compassDirection} {Math.round(heading)}°</div>
       </div>
 
-      {/* Location Info — bottom left */}
+      {/* Location Info — bottom left (with colored distance badges) */}
       <div className="location-info">
         <div className="location-card">
           <div className="location-street">
@@ -156,9 +177,12 @@ export default function HUD({ position, gameMode, score }) {
           </div>
           {landmarks.length > 0 && (
             <div className="location-landmarks">
-              {landmarks.slice(0, 2).map((lm) => (
-                <div key={lm.name}>
-                  {lm.icon} {lm.name} — {lm.distance}m
+              {landmarks.slice(0, 3).map((lm, i) => (
+                <div key={lm.name} className="landmark-row">
+                  <span className="landmark-name">{lm.icon} {lm.name}</span>
+                  <span className={`landmark-badge ${BADGE_COLORS[i % BADGE_COLORS.length]}`}>
+                    {formatDistance(lm.distance)}
+                  </span>
                 </div>
               ))}
             </div>

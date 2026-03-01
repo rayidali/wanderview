@@ -5,63 +5,67 @@
  */
 
 (function () {
-  const scene = document.querySelector('#game-scene');
-  const loadingScreen = document.getElementById('loading-screen');
+  // Track ready state at the top level so we never miss the tilesReady event
+  var isReady = false;
 
-  let isReady = false;
+  function markReady() {
+    if (isReady) return;
+    isReady = true;
+    if (window.gameEngine) window.gameEngine.setReady();
 
-  // Wait for A-Frame scene to load
-  if (scene) {
-    scene.addEventListener('loaded', function () {
-      console.log('A-Frame scene loaded');
-      onSceneReady();
-    });
+    // Update loading screen visuals (only works after DOM is parsed)
+    var loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+      var fill = loadingScreen.querySelector('.loader-fill');
+      if (fill) fill.style.width = '100%';
+      var hint = loadingScreen.querySelector('.loader-hint');
+      if (hint) {
+        hint.textContent = 'Click to start exploring';
+        hint.classList.add('pulse');
+      }
+    }
   }
 
-  function onSceneReady() {
-    // Hide loading screen on first click (pointer lock)
+  // Listen for tilesReady immediately — tiles component may fire
+  // before DOMContentLoaded since A-Frame inits during body parse
+  window.addEventListener('tilesReady', markReady);
+
+  // Fallback: if nothing signals ready within 2 seconds of DOM parse, force it
+  document.addEventListener('DOMContentLoaded', function () {
+    var scene = document.querySelector('#game-scene');
+    var loadingScreen = document.getElementById('loading-screen');
+
+    // If tiles already signaled ready before DOM was parsed, apply visuals now
+    if (isReady || (window.gameEngine && window.gameEngine.isReady)) {
+      markReady();
+    }
+
+    // Fallback timer
+    setTimeout(markReady, 2000);
+
+    // Register loading screen click handler — only dismiss when ready
     if (loadingScreen) {
       loadingScreen.addEventListener('click', function () {
+        if (!isReady) return; // Don't let user through until ready
         loadingScreen.classList.add('hidden');
-        // Request pointer lock after dismissing loading screen
-        const canvas = scene.canvas;
-        if (canvas && canvas.requestPointerLock) {
-          canvas.requestPointerLock();
+        if (scene && scene.canvas && scene.canvas.requestPointerLock) {
+          scene.canvas.requestPointerLock();
         }
       });
     }
 
-    // If tiles are loading, listen for ready event
-    window.addEventListener('tilesReady', function () {
-      isReady = true;
-      if (loadingScreen) {
-        loadingScreen.querySelector('.loader-fill').style.width = '100%';
-        loadingScreen.querySelector('.loader-hint').textContent = 'Click to start exploring';
-        loadingScreen.querySelector('.loader-hint').classList.add('pulse');
-      }
-    });
+    // Scene lifecycle logging
+    if (scene) {
+      scene.addEventListener('loaded', function () {
+        console.log('A-Frame scene loaded');
+      });
+      scene.addEventListener('renderstart', function () {
+        console.log('Rendering started');
+      });
+    }
+  });
 
-    // Set a timeout to show ready state even without tiles
-    setTimeout(function () {
-      if (!isReady) {
-        isReady = true;
-        if (window.gameEngine) window.gameEngine.setReady();
-        if (loadingScreen) {
-          loadingScreen.querySelector('.loader-fill').style.width = '100%';
-          loadingScreen.querySelector('.loader-hint').textContent = 'Click to start exploring';
-          loadingScreen.querySelector('.loader-hint').classList.add('pulse');
-        }
-      }
-    }, 3000);
-
-    // Track position updates at lower frequency for perf
-    let lastUpdate = 0;
-    scene.addEventListener('renderstart', function () {
-      console.log('Rendering started');
-    });
-  }
-
-  // Keyboard shortcut: press M to toggle minimap
+  // Keyboard shortcuts (safe to register on document immediately)
   document.addEventListener('keydown', function (e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     if (e.key === 'm' || e.key === 'M') {
